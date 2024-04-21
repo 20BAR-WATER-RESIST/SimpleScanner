@@ -1,4 +1,6 @@
-﻿namespace SimpleScanner;
+﻿using SimpleScanner.CustomControls;
+
+namespace SimpleScanner;
 
 public partial class App : Application
 {
@@ -6,6 +8,16 @@ public partial class App : Application
     {
         InitializeComponent();
 
-        MainPage = new AppShell();
+        MainPage = new ScannerPage();
+        
+        Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("MyCustomization", (handler, view) =>
+        {
+            if( view is CustomBarcodeEntry)
+            {
+#if ANDROID
+                    handler.PlatformView.ShowSoftInputOnFocus = false;
+#endif
+            }
+        });
     }
 }
