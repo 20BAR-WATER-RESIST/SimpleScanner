@@ -1,10 +1,12 @@
 ﻿using Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;
+using System.Threading;
 
 namespace SimpleScanner;
 
 public partial class ScannerPage : ContentPage
 {
     private int TextInsertedCounter { get; set; } = 0;
+
     public ScannerPage()
     {
         InitializeComponent();
@@ -25,42 +27,64 @@ public partial class ScannerPage : ContentPage
         
         if (TextInsertedCounter == 1)
         {
-            //await AnalyzingStage();
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancellationTokenSource cancellationTokenSource2 = new CancellationTokenSource();
+            //CancellationTokenSource cancellationTokenSource3 = new CancellationTokenSource();
+
+            SwitchStage("Analyzing", cancellationTokenSource.Token);
+
             await WaitMethod(3);
+
+            await cancellationTokenSource.CancelAsync();
+
+            await WaitMethod(0.5);
+
+            SwitchStage("Fetching Data", cancellationTokenSource2.Token);
+
+            await WaitMethod(3);
+
+            await cancellationTokenSource.CancelAsync();
+
         }
     }
     
-    private async Task WaitMethod(int seconds)
+    private async Task WaitMethod(double seconds)
     {
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-        CancellationToken cancellationToken = cancellationTokenSource.Token;
-
-        await AnalyzingStage(cancellationToken);
-        
-        await Task.Delay(seconds * 1000);
-        cancellationTokenSource.Cancel();
-        
-        return;
+        await Task.Delay((int)(seconds * 1000));
     }
 
-    private async Task AnalyzingStage(CancellationToken token)
+    private async Task SwitchStage(String stageValue,CancellationToken token)
     {
-        StageInfoLabel.Text = "Analyzing";
+        StageInfoLabel.Text = stageValue;
 
         for(int i = 0; i < 4;)
         {
-            await Task.Delay(600);
+            
             if (i < 3)
             {
                 StageInfoLabel.Text += ".";
                 i++;
+
+                if (token.IsCancellationRequested)
+                {
+                    StageInfoLabel.Text = "";
+                    i = 4;
+                }
+                
             }
             else
             {
-                StageInfoLabel.Text = "Analyzing";
+                StageInfoLabel.Text = stageValue;
                 i = 0;
+
+                if (token.IsCancellationRequested)
+                {
+                    StageInfoLabel.Text = "";
+                    i = 4;
+                }
             }
+
+            await Task.Delay(600);
         }
-        return;
     }
 }
