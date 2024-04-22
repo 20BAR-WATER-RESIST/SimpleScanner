@@ -8,9 +8,11 @@
 
             <Image Source="barcode_scanner.png" MaximumHeightRequest="150" MaximumWidthRequest="150" />
             
+            <Label x:Name="StageInfoLabel" TextColor="White" FontSize="50" />
+            
             <cc:CustomBarcodeEntry
                 x:Name="CbEntry"
-                Opacity="0"/>
+                Opacity="1" />
             
         </VerticalStackLayout>
 
